@@ -100,9 +100,9 @@ main.prototype = {
 
 		this.mosquito_noise = game.add.audio('mosquito_noise');
 		this.mosquito_noise.loopFull();
-		this.background_sound = game.add.audio('background_sound');
-		this.background_sound.volume = 0.2;
-		this.background_sound.loopFull();
+		//this.background_sound = game.add.audio('background_sound');
+		//this.background_sound.volume = 0.2;
+		//this.background_sound.loopFull();
 
 		this.music1 = game.add.audio('music1');
 		this.music1.loopFull();
