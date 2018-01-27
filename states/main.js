@@ -26,6 +26,10 @@ main.prototype = {
 	score_text: null,
 	score: 0,
 
+	time_spawner: 1000,
+
+	repelentes: null,
+
   preload: function() {
     console.log("preload main");
 
@@ -54,6 +58,14 @@ main.prototype = {
 
 		this.score_text = game.add.text(20,20, 'Score: ' + this.score);
 
+		game.time.events.loop(1000, this._spawnObjects, this);
+
+
+		this.repelentes = game.add.group();
+		this.repelentes.enableBody = true;
+		this.repelentes.physicsBodyType = Phaser.Physics.ARCADE;
+
+		//this.repelentes.events.onOutOfBounds.add(this._repelentesOut, this);
   },
 
   update: function() {
@@ -94,7 +106,32 @@ main.prototype = {
 		game.physics.arcade.overlap(this.mosquito, this.people, this._collisionPeople, null, this);
 		game.physics.arcade.overlap(this.mosquito, this.bucket, this._collisionBucket, null, this);
 
+
+		/*var i = 0;
+		this.repelentes.forEach(function(repelente){
+
+			if(i % 2 == 0) {
+				repelente.x = -20;
+			}
+			console.log(i);
+			console.log("arriba");
+			console.log("abajo");
+			i++;
+   	});*/
+
+		this.repelentes.forEach(function(repelente,index){
+			repelente.x -= 10;
+
+		});
+
+
+
   },
+
+	_repelentesOut: function(repelente) {
+		console.log("repelente out");
+		repelente.kill();
+	},
 
 	_collisionPeople: function(mosquito, people) {
 		console.log("collision con people");
@@ -113,12 +150,23 @@ main.prototype = {
 			this.score_text.setText('Score: ' + this.score);
 		}
 
+	},
+
+	_spawnObjects: function() {
+		console.log("spawn objects");
+
+		console.log(this.repelentes.length);
+
+		for(var i = 0; i < 3; i++) {
+			var repelente = this.repelentes.create(760, 560, 'mosquito');
+			repelente.checkWorldBounds = true;
+			repelente.events.onOutOfBounds.add(this._repelentesOut, this);
+		}
+
+		/*var repelente1 = this.repelentes.create(760, 560, 'mosquito');
+		var repelente2 = this.repelentes.create(760, 560, 'mosquito');
+		var repelente3 = this.repelentes.create(760, 560, 'mosquito');*/
 	}
 
-	/*_collectDesalojo: function(player, desalojo){
 
-		this.collect_sound.play();
-		desalojo.kill();
-
-	},*/
 }
