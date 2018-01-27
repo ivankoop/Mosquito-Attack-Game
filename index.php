@@ -18,7 +18,13 @@
         game.load.image('mosquito', 'assets/mosquito.png');
         game.load.image('people', 'assets/people.png');
         game.load.image('bucket', 'assets/bucket.png');
-        game.load.image('background', 'assets/background.jpg');
+        game.load.image('espiral', 'assets/espiral.png');
+        game.load.image('background', 'assets/background.png');
+        game.load.image('lamp', 'assets/lamp.png');
+        game.load.image('repelente','assets/repelente.png');
+        game.load.audio('mosquito_noise', 'assets/mosquito_noise.mp3');
+        game.load.audio('background_sound', 'assets/background_sound.wav');
+        game.load.audio('music1','assets/music1.mp3');
         console.log("preload del game");
 
       }
