@@ -1,3 +1,4 @@
+
 var main = function(game){
 	console.log("Main");
 };
@@ -32,9 +33,9 @@ main.prototype = {
 	repelente2: null,
 	repelente3: null,
 
-	time_spawner_espiral1: 2000,
+	time_spawner_espiral1: 3000,
 	animate_espiral1: false,
-	time_spawner_espiral2: 2000,
+	time_spawner_espiral2: 3500,
 	animate_espiral2: true,
 
 	espiral1: null,
@@ -46,18 +47,29 @@ main.prototype = {
 	music1: null,
 
 	short_spray_sound: null,
-
 	poof_smoke_sound: null,
-
 	lamp: null,
-
 	spawn_lamp: false,
-
 	drink_sound: null,
-
 	drop_sound: null,
-
 	full_sound: null,
+	death_sound: null,
+
+	mosquito_live_one: null,
+	mosquito_live_two: null,
+	mosquito_live_three: null,
+	mosquito_live_four: null,
+
+	mosquito_lives: 4,
+
+	nube: null,
+
+	espiral_time_event: null,
+	repelente_time_event: null,
+
+	ciudad: null,
+
+	espiral_bottom: null,
 
   preload: function() {
     console.log("preload main");
@@ -66,16 +78,38 @@ main.prototype = {
 
   create: function() {
 
-		game.add.sprite(0,0,'background');
+		game.add.sprite(0,0,'background1');
+
+		this.nube = game.add.tileSprite(0,90,800,80,'nube');
+
+		this.ciudad = game.add.tileSprite(0,90,800,180,'ciudad');
+
+		game.add.sprite(0,0,'background2');
 
 		game.physics.startSystem(Phaser.Physics.ARCADE);
 
+		this.espiral_bottom1 = game.add.sprite(340,550, 'espiral_bottom');
+		this.espiral_bottom1.enableBody = true;
+		this.espiral_bottom1.physicsBodyType = Phaser.Physics.ARCADE;
+		this.espiral_bottom1.checkWorldBounds = true;
 
-		this.people = game.add.sprite(600,300, 'people');
+		this.mosquito_live_one = game.add.sprite(730,10,'mosquito_sp','mosquito/gordo/Comp 1_00000.png');
+		this.mosquito_live_one.scale.setTo(0.4,0.4);
+
+		this.mosquito_live_two = game.add.sprite(680,10,'mosquito_sp','mosquito/gordo/Comp 1_00000.png');
+		this.mosquito_live_two.scale.setTo(0.4,0.4);
+
+		this.mosquito_live_three = game.add.sprite(630,10,'mosquito_sp','mosquito/gordo/Comp 1_00000.png');
+		this.mosquito_live_three.scale.setTo(0.4,0.4);
+
+		this.mosquito_live_four = game.add.sprite(580,10,'mosquito_sp','mosquito/gordo/Comp 1_00000.png');
+		this.mosquito_live_four.scale.setTo(0.4,0.4);
+
+
+		this.people = game.add.sprite(650,320, 'people');
 		game.physics.enable(this.people, Phaser.Physics.ARCADE);
 
-
-		this.bucket = game.add.sprite(0,450, 'bucket');
+		this.bucket = game.add.sprite(20,450, 'bucket');
 		game.physics.enable(this.bucket, Phaser.Physics.ARCADE);
 
 		this.mosquito = game.add.sprite(100,400, 'mosquito_sp', 'mosquito/gordo/Comp 1_00000.png');
@@ -89,16 +123,13 @@ main.prototype = {
 		this.mosquito.scale.setTo(0.5,0.5);
 
 
-
 		game.physics.enable(this.mosquito, Phaser.Physics.ARCADE);
 		this.mosquito.body.collideWorldBounds = true;
 
 		this.mosquito.body.bounce.setTo(1, 1);
 
+		this.repelente_time_event= game.time.events.loop(this.time_spawner_repelente, this._spawnRepelentes, this);
 
-		this.score_text = game.add.text(20,20, 'Score: ' + this.score);
-
-		game.time.events.loop(this.time_spawner_repelente, this._spawnRepelentes, this);
 
 		this.repelente1 = game.add.group();
 		this.repelente1.enableBody = true;
@@ -112,29 +143,26 @@ main.prototype = {
 		this.repelente3.enableBody = true;
 		this.repelente3.physicsBodyType = Phaser.Physics.ARCADE;
 
-		this.espiral1 = game.add.sprite(280,680, 'espiral');
-		this.espiral2 = game.add.sprite(480,280, 'espiral');
 
-		game.time.events.loop(this.time_spawner_espiral1, this._spawnEspiral1, this);
-		game.time.events.loop(this.time_spawner_espiral2, this._spawnEspiral2, this);
+		this.espiral1 = game.add.group();
+		this.espiral1.enableBody = true;
+		this.espiral1.physicsBodyType = Phaser.Physics.ARCADE;
+
+		this.espiral_time_event = game.time.events.loop(this.time_spawner_espiral1, this._spawnEspiral1, this);
+
 
 		this.mosquito_noise = game.add.audio('mosquito_noise');
 		this.mosquito_noise.loopFull();
-		//this.background_sound = game.add.audio('background_sound');
-		//this.background_sound.volume = 0.2;
-		//this.background_sound.loopFull();
 
 		this.music1 = game.add.audio('music1');
 		this.music1.loopFull();
 		this.music1.volume = 0.3;
 
 		this.short_spray_sound = game.add.audio('short_spray');
-
 		this.drink_sound = game.add.audio('drink_sound');
-
 		this.drop_sound = game.add.audio('drop_sound');
-
 		this.full_sound = game.add.audio('full_sound');
+		this.death_sound = game.add.audio('death_sound');
 
 
   },
@@ -142,6 +170,9 @@ main.prototype = {
 	mosquito_dead: false,
 
   update: function() {
+
+
+		this.nube.tilePosition.x += 0.8;
 
 		if(!this.mosquito_dead) {
 
@@ -191,6 +222,13 @@ main.prototype = {
 		game.physics.arcade.overlap(this.mosquito, this.repelente2, this._collisionRepelente, null, this);
 		game.physics.arcade.overlap(this.mosquito, this.repelente3, this._collisionRepelente, null, this);
 
+		game.physics.arcade.overlap(this.mosquito, this.espiral1, this._collisionRepelente, null, this);
+		game.physics.arcade.overlap(this.mosquito, this.espiral_bottom1, this._collisionRepelente, null, this);
+
+		this.espiral1.forEach(function(espiral1){
+			espiral1.y -= 5;
+		});
+
 
 		this.repelente1.forEach(function(repelente1){
 			repelente1.x -= 5;
@@ -207,23 +245,19 @@ main.prototype = {
 			repelente3.y -= 5;
 		});
 
-		if(this.animate_espiral1) {
-			this.espiral1.y += 4;
-		} else {
-			this.espiral1.y -= 4;
-		}
-
-		if(this.animate_espiral2) {
-			this.espiral2.y += 4;
-		} else {
-			this.espiral2.y -= 4;
-		}
 
 		if(this.mosquito_dead) {
 			this.mosquito_y_speed += 0.2;
 			this.mosquito.animations.play('muerte_animate');
-		}
 
+			setTimeout(function(){
+				game.sound.stopAll();
+				game.state.start("finish");
+			},1500);
+
+			return;
+
+		}
 
   },
 
@@ -234,43 +268,71 @@ main.prototype = {
 		game.physics.arcade.moveToObject(this.mosquito, this.lamp, 200);
 	},
 
-	//test_count: 0,
 	_spawnEspiral1: function() {
 		console.log("spawn espiral!!");
-
-		if(this.animate_espiral1) {
-			this.animate_espiral1 = false;
-		} else {
-			this.animate_espiral1 = true;
-		}
-
-		/*this.test_count++;
-
-		if(this.test_count == 3) {
-			this._spawnLamp();
-		}
-
-		if(this.test_count == 6) {
-			this.lamp.kill();
-		}*/
+		var espiral1_item = this.espiral1.create(352,270, 'espiral');
+		espiral1_item.checkWorldBounds = true;
+		espiral1_item.events.onOutOfBounds.add(this._espiral1Out, this);
 
 	},
 
-	first_spawn_espiral2: true,
-	_spawnEspiral2: function() {
-		console.log("spawn espiral22!!");
+	_espiral1Out: function(espiral1) {
+		console.log("espiral 1 out");
+		espiral1.kill();
+	},
 
-		if(this.animate_espiral2) {
-			this.animate_espiral2 = false;
-		} else {
-			this.animate_espiral2 = true;
-		}
+	_espiral2Out: function(espiral2) {
+		console.log("espiral 2 out!");
+		espiral2.kill();
+	},
+
+	_mosquitoHit: function() {
 
 	},
+
+	mosquito_inmune: false,
 
 	_collisionRepelente: function(mosquito,repelente) {
-		//console.log("collision repelente");
-		//this.mosquito_dead = true;
+		console.log("mosquito inmune " + this.mosquito_inmune);
+
+		var me = this;
+
+		if(!this.mosquito_inmune) {
+			this.mosquito_inmune = true;
+			this.death_sound.play();
+			this.mosquito.animations.play('muerte_animate');
+
+			me.mosquito_lives--;
+
+			if(me.mosquito_lives == 3) {
+				me.mosquito_live_four.kill();
+			}
+
+			if(me.mosquito_lives == 2) {
+				me.mosquito_live_three.kill();
+			}
+
+			if(me.mosquito_lives == 1) {
+				me.mosquito_live_two.kill();
+			}
+
+			if(me.mosquito_lives == 0) {
+				me.mosquito_live_one.kill();
+				console.log("PERDISTE!");
+				me.mosquito_dead = true;
+			}
+
+			setTimeout(function() {
+
+				me.mosquito_inmune = false;
+				if(me.larva_collected) {
+					me.mosquito.animations.play('flaco_animate');
+				} else {
+					me.mosquito.animations.play('gordo_animate');
+				}
+			},2000);
+
+		}
 
 	},
 
@@ -312,18 +374,6 @@ main.prototype = {
 		}
 
 
-
-		/*if(this.picada_count == this.max_picada) {
-			if(!this.larva_collected) {
-				this._collectLarva();
-			}
-
-		}
-
-		if(!this.larva_collected) {
-			this.drink_sound.play();
-		}*/
-
 	},
 
 	_collectLarva: function() {
@@ -344,16 +394,31 @@ main.prototype = {
 				this._leaveLarva();
 				this.score += 10;
 				this.drop_sound.play();
-				this.score_text.setText('Score: ' + this.score);
 			}
 		}
 
 	},
 
+	last_x_position_larva: 10,
+	last_y_position_larva: 10,
 	_leaveLarva: function() {
 		console.log("deja la larvita");
 		this.mosquito.animations.play('gordo_animate');
 		this.larva_collected = false;
+
+		this.espiral_time_event.delay -= 500;
+		this.repelente_time_event.delay -= 500;
+
+		var larvita = game.add.sprite(this.last_x_position_larva,this.last_y_position_larva,'larva');
+		larvita.scale.setTo(0.3,0.3);
+		this.last_x_position_larva += 30;
+
+		if(this.last_x_position_larva == 310) { //super chota la logica, pero ni cagando le dejo ganar mas adelante hehe
+			this.last_x_position_larva = 10;
+			this.last_y_position_larva = 40;
+		}
+
+
 	},
 
 	_repelente1Out: function(repelente1) {
@@ -370,23 +435,51 @@ main.prototype = {
 
 
 	_spawnRepelentes: function() {
-		//console.log("spawn objects");
+
+		this.people.loadTexture('people_angry');
+		this.people.x = 608;
+
+		var me = this;
+
 		this.short_spray_sound.play();
-		var repelente1_item = this.repelente1.create(600, 360, 'repelente'); //TODO: cambiar estos sprites
-		repelente1_item.scale.setTo(0.2,0.2);
+		var repelente1_item = this.repelente1.create(600, 360, 'repelente');
 		repelente1_item.checkWorldBounds = true;
 		repelente1_item.events.onOutOfBounds.add(this._repelente1Out, this);
 
-		var repelente2_item = this.repelente2.create(600,360,'repelente'); //TODO: cambiar estos sprites
-		repelente2_item.scale.setTo(0.2,0.2);
+		var repelente2_item = this.repelente2.create(600,360,'repelente');
 		repelente2_item.checkWorldBounds = true;
 		repelente2_item.events.onOutOfBounds.add(this._repelente2Out, this);
 
-		var repelente3_item = this.repelente3.create(600,360,'repelente'); //TODO: cambiar estos sprites
-		repelente3_item.scale.setTo(0.2,0.2);
+		var repelente3_item = this.repelente3.create(600,360,'repelente');
 		repelente3_item.checkWorldBounds = true;
 		repelente3_item.events.onOutOfBounds.add(this._repelente3Out, this);
+
+		setTimeout(function() {
+			me.people.loadTexture('people');
+			me.people.x = 650;
+		},1000);
+
 	}
 
+
+}
+
+var finish = function(game){
+	console.log("Main");
+};
+
+finish.prototype = {
+
+	preload: function() {
+		console.log("preload de finish");
+	},
+
+	create: function() {
+		console.log("update de finish");
+	},
+
+	update: function() {
+		console.log("update de finish");
+	}
 
 }
