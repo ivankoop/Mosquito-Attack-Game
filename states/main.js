@@ -26,7 +26,7 @@ main.prototype = {
 	score_text: null,
 	score: 0,
 
-	time_spawner_repelente: 2000,
+	time_spawner_repelente: 4000,
 
 	repelente1: null,
 	repelente2: null,
@@ -45,9 +45,19 @@ main.prototype = {
 	background_sound: null,
 	music1: null,
 
+	short_spray_sound: null,
+
+	poof_smoke_sound: null,
+
 	lamp: null,
 
 	spawn_lamp: false,
+
+	drink_sound: null,
+
+	drop_sound: null,
+
+	full_sound: null,
 
   preload: function() {
     console.log("preload main");
@@ -60,21 +70,31 @@ main.prototype = {
 
 		game.physics.startSystem(Phaser.Physics.ARCADE);
 
-		this.mosquito = game.add.sprite(100, 400, 'mosquito');
+
+		this.people = game.add.sprite(600,300, 'people');
+		game.physics.enable(this.people, Phaser.Physics.ARCADE);
+
+
+		this.bucket = game.add.sprite(0,450, 'bucket');
+		game.physics.enable(this.bucket, Phaser.Physics.ARCADE);
+
+		this.mosquito = game.add.sprite(100,400, 'mosquito_sp', 'mosquito/gordo/Comp 1_00000.png');
+
+		this.mosquito.animations.add('flaco_animate', Phaser.Animation.generateFrameNames('mosquito/flaco/Comp 2_0', 1, 124, '.png', 4), 45, true, false);
+		//this.mosquito.animations.play('flaco_animate');
+		this.mosquito.animations.add('gordo_animate', Phaser.Animation.generateFrameNames('mosquito/gordo/Comp 1_0', 1, 124, '.png', 4), 45, true, false);
+		this.mosquito.animations.add('muerte_animate', Phaser.Animation.generateFrameNames('mosquito/hit/Comp 3_0', 1, 124, '.png', 4), 45, true, false);
+		this.mosquito.animations.play('gordo_animate');
 		this.mosquito.anchor.set(0.5);
-		this.mosquito.scale.setTo(0.8,0.8);
+		this.mosquito.scale.setTo(0.5,0.5);
+
+
+
 		game.physics.enable(this.mosquito, Phaser.Physics.ARCADE);
 		this.mosquito.body.collideWorldBounds = true;
 
 		this.mosquito.body.bounce.setTo(1, 1);
 
-		this.people = game.add.sprite(650,340, 'people');
-		game.physics.enable(this.people, Phaser.Physics.ARCADE);
-		this.people.body.collideWorldBounds = true;
-		this.people.body.immovable = true;
-
-		this.bucket = game.add.sprite(0,450, 'bucket');
-		game.physics.enable(this.bucket, Phaser.Physics.ARCADE);
 
 		this.score_text = game.add.text(20,20, 'Score: ' + this.score);
 
@@ -108,46 +128,57 @@ main.prototype = {
 		this.music1.loopFull();
 		this.music1.volume = 0.3;
 
+		this.short_spray_sound = game.add.audio('short_spray');
 
+		this.drink_sound = game.add.audio('drink_sound');
 
+		this.drop_sound = game.add.audio('drop_sound');
 
-		//game.physics.arcade.accelerateToObject(this.mosquito, this.lamp, 50);
+		this.full_sound = game.add.audio('full_sound');
+
 
   },
 
+	mosquito_dead: false,
+
   update: function() {
 
-		if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
+		if(!this.mosquito_dead) {
 
-			this.mosquito.scale.x = -0.8;
-			if(this.mosquito_x_speed > this.mosquito_x_min_speed) {
-				this.mosquito_x_speed -= 0.2;
+			if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
+
+				this.mosquito.scale.x = -0.5;
+				if(this.mosquito_x_speed > this.mosquito_x_min_speed) {
+					this.mosquito_x_speed -= 0.2;
+				}
+
+
+			} else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+
+				if(this.mosquito_x_speed < this.mosquito_x_max_speed) {
+					this.mosquito_x_speed += 0.2;
+				}
+
+				this.mosquito.scale.x = 0.5;
 			}
 
+			if(game.input.keyboard.isDown(Phaser.Keyboard.DOWN)) {
 
-		} else if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+				if(this.mosquito_y_speed < this.mosquito_y_max_speed) {
+					this.mosquito_y_speed += 0.2;
 
-			if(this.mosquito_x_speed < this.mosquito_x_max_speed) {
-				this.mosquito_x_speed += 0.2;
+				}
+
+			} else if(game.input.keyboard.isDown(Phaser.Keyboard.UP)) {
+
+				if(this.mosquito_y_speed > this.mosquito_y_min_speed) {
+					this.mosquito_y_speed -= 0.2;
+				}
+
 			}
 
-			this.mosquito.scale.x = 0.8;
 		}
 
-		if(game.input.keyboard.isDown(Phaser.Keyboard.DOWN)) {
-
-			if(this.mosquito_y_speed < this.mosquito_y_max_speed) {
-				this.mosquito_y_speed += 0.2;
-
-			}
-
-		} else if(game.input.keyboard.isDown(Phaser.Keyboard.UP)) {
-
-			if(this.mosquito_y_speed > this.mosquito_y_min_speed) {
-				this.mosquito_y_speed -= 0.2;
-			}
-
-		}
 
 		this.mosquito.y += this.mosquito_y_speed;
 		this.mosquito.x += this.mosquito_x_speed;
@@ -186,6 +217,11 @@ main.prototype = {
 			this.espiral2.y += 4;
 		} else {
 			this.espiral2.y -= 4;
+		}
+
+		if(this.mosquito_dead) {
+			this.mosquito_y_speed += 0.2;
+			this.mosquito.animations.play('muerte_animate');
 		}
 
 
@@ -233,27 +269,91 @@ main.prototype = {
 	},
 
 	_collisionRepelente: function(mosquito,repelente) {
-		console.log("collision repelente");
+		//console.log("collision repelente");
+		//this.mosquito_dead = true;
+
 	},
 
 
+	picar_flag: true,
 	_collisionPeople: function(mosquito, people) {
-		console.log("collision con people");
-		mosquito.x -= 10;
 
-		this.mosquito_x_speed = 0;
-		this.mosquito_y_speed = 0;
+		var me = this;
+
+		game.input.keyboard.onUpCallback = function (e) {
+			if(e.keyCode == 32) {
+				me.picar_flag = true;
+			}
+		};
+
+		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+			if(this.picar_flag) {
+				this.picar_flag = false;
+				this._picarHumano();
+			}
+		}
+
+	},
+
+	max_picada: 10,
+
+	picada_count: 0,
+	larva_collected: false,
+	_picarHumano: function() {
+		console.log("picar humano!!!");
+
+		if(!this.larva_collected) {
+			this.picada_count++;
+			this.drink_sound.play();
+			if(this.picada_count == this.max_picada) {
+				this._collectLarva();
+			}
+
+		}
+
+
+
+		/*if(this.picada_count == this.max_picada) {
+			if(!this.larva_collected) {
+				this._collectLarva();
+			}
+
+		}
+
+		if(!this.larva_collected) {
+			this.drink_sound.play();
+		}*/
+
+	},
+
+	_collectLarva: function() {
+		this.picada_count = 0;
+		this.larva_collected = true;
+		this.mosquito.animations.play('flaco_animate');
+		this.full_sound.play();
+		console.log("ya tengo la larvita! wooohoo");
 	},
 
 	_collisionBucket: function(mosquito, bucket) {
 		console.log("collision con bucket");
 
+
 		if(game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
 			console.log("esta dejando las larvas");
-			this.score += 10;
-			this.score_text.setText('Score: ' + this.score);
+			if(this.larva_collected) {
+				this._leaveLarva();
+				this.score += 10;
+				this.drop_sound.play();
+				this.score_text.setText('Score: ' + this.score);
+			}
 		}
 
+	},
+
+	_leaveLarva: function() {
+		console.log("deja la larvita");
+		this.mosquito.animations.play('gordo_animate');
+		this.larva_collected = false;
 	},
 
 	_repelente1Out: function(repelente1) {
@@ -271,18 +371,18 @@ main.prototype = {
 
 	_spawnRepelentes: function() {
 		//console.log("spawn objects");
-
-		var repelente1_item = this.repelente1.create(760, 560, 'repelente'); //TODO: cambiar estos sprites
+		this.short_spray_sound.play();
+		var repelente1_item = this.repelente1.create(600, 360, 'repelente'); //TODO: cambiar estos sprites
 		repelente1_item.scale.setTo(0.2,0.2);
 		repelente1_item.checkWorldBounds = true;
 		repelente1_item.events.onOutOfBounds.add(this._repelente1Out, this);
 
-		var repelente2_item = this.repelente2.create(760,560,'repelente'); //TODO: cambiar estos sprites
+		var repelente2_item = this.repelente2.create(600,360,'repelente'); //TODO: cambiar estos sprites
 		repelente2_item.scale.setTo(0.2,0.2);
 		repelente2_item.checkWorldBounds = true;
 		repelente2_item.events.onOutOfBounds.add(this._repelente2Out, this);
 
-		var repelente3_item = this.repelente3.create(760,560,'repelente'); //TODO: cambiar estos sprites
+		var repelente3_item = this.repelente3.create(600,360,'repelente'); //TODO: cambiar estos sprites
 		repelente3_item.scale.setTo(0.2,0.2);
 		repelente3_item.checkWorldBounds = true;
 		repelente3_item.events.onOutOfBounds.add(this._repelente3Out, this);
