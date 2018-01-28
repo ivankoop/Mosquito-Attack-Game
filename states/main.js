@@ -32,6 +32,7 @@ main.prototype = {
 	repelente1: null,
 	repelente2: null,
 	repelente3: null,
+	repelente4: null,
 
 	time_spawner_espiral1: 3000,
 	animate_espiral1: false,
@@ -143,6 +144,10 @@ main.prototype = {
 		this.repelente3.enableBody = true;
 		this.repelente3.physicsBodyType = Phaser.Physics.ARCADE;
 
+		this.repelente4 = game.add.group();
+		this.repelente4.enableBody = true;
+		this.repelente4.physicsBodyType = Phaser.Physics.ARCADE;
+
 
 		this.espiral1 = game.add.group();
 		this.espiral1.enableBody = true;
@@ -221,6 +226,7 @@ main.prototype = {
 		game.physics.arcade.overlap(this.mosquito, this.repelente1, this._collisionRepelente, null, this);
 		game.physics.arcade.overlap(this.mosquito, this.repelente2, this._collisionRepelente, null, this);
 		game.physics.arcade.overlap(this.mosquito, this.repelente3, this._collisionRepelente, null, this);
+		game.physics.arcade.overlap(this.mosquito, this.repelente4, this._collisionRepelente, null, this);
 
 		game.physics.arcade.overlap(this.mosquito, this.espiral1, this._collisionRepelente, null, this);
 		game.physics.arcade.overlap(this.mosquito, this.espiral_bottom1, this._collisionRepelente, null, this);
@@ -243,6 +249,11 @@ main.prototype = {
 		this.repelente3.forEach(function(repelente3){
 			repelente3.x -= 2;
 			repelente3.y -= 5;
+		});
+
+		this.repelente4.forEach(function(repelente3){
+			repelente3.x -= 5;
+			repelente3.y += 2;
 		});
 
 
@@ -406,8 +417,8 @@ main.prototype = {
 		this.mosquito.animations.play('gordo_animate');
 		this.larva_collected = false;
 
-		this.espiral_time_event.delay -= 500;
-		this.repelente_time_event.delay -= 500;
+		this.espiral_time_event.delay -= 200;
+		this.repelente_time_event.delay -= 200;
 
 		var larvita = game.add.sprite(this.last_x_position_larva,this.last_y_position_larva,'larva');
 		larvita.scale.setTo(0.3,0.3);
@@ -433,6 +444,10 @@ main.prototype = {
 		repelente3.kill();
 	},
 
+	_repelente4Out: function(repelente4) {
+		repelente4.kill();
+	},
+
 
 	_spawnRepelentes: function() {
 
@@ -454,6 +469,10 @@ main.prototype = {
 		repelente3_item.checkWorldBounds = true;
 		repelente3_item.events.onOutOfBounds.add(this._repelente3Out, this);
 
+		var repelente4_item = this.repelente4.create(600,360,'repelente');
+		repelente4_item.checkWorldBounds = true;
+		repelente4_item.events.onOutOfBounds.add(this._repelente4Out, this);
+
 		setTimeout(function() {
 			me.people.loadTexture('people');
 			me.people.x = 650;
@@ -465,7 +484,7 @@ main.prototype = {
 }
 
 var finish = function(game){
-	console.log("Main");
+	console.log("Finish");
 };
 
 finish.prototype = {
@@ -474,12 +493,215 @@ finish.prototype = {
 		console.log("preload de finish");
 	},
 
+	play_again_btn: null,
+
 	create: function() {
 		console.log("update de finish");
+		var background = game.add.sprite(0,0,'game_over');
+		this.play_again_btn = game.add.sprite(310,520,'button');
+		this.play_again_btn.inputEnabled = true;
+		this.play_again_btn.input.useHandCursor = true;
+		this.play_again_btn.events.onInputDown.add(this.playAgain, this);
+
+		this.play_again_btn.alpha = 0;
+
 	},
 
 	update: function() {
 		console.log("update de finish");
-	}
+	},
+
+	playAgain: function() {
+		//game.state.start("menu");
+		location.reload();
+	},
+
 
 }
+
+var menu = function(game){
+	console.log("Menu");
+};
+
+menu.prototype = {
+
+	preload: function() {
+		console.log("preload de menu");
+	},
+
+	play_btn: null,
+	credits_btn: null,
+
+	create: function() {
+		console.log("update de menu");
+		var background = game.add.sprite(0,0,'menu');
+		this.play_btn = game.add.sprite(310,520,'button');
+		this.play_btn.inputEnabled = true;
+		this.play_btn.input.useHandCursor = true;
+		this.play_btn.events.onInputDown.add(this.Play, this);
+
+		this.play_btn.alpha = 0;
+
+		this.credits_btn = game.add.sprite(610,520,'button');
+		this.credits_btn.inputEnabled = true;
+		this.credits_btn.input.useHandCursor = true;
+		this.credits_btn.events.onInputDown.add(this.Credits, this);
+
+		this.credits_btn.alpha = 0;
+
+	},
+
+	update: function() {
+		console.log("update de menu");
+	},
+
+	Play: function() {
+		console.log("play");
+		game.state.start("howto");
+	},
+
+	Credits: function() {
+		game.state.start("credits");
+	},
+
+
+}
+
+var credits = function(game){
+	console.log("credits");
+};
+
+credits.prototype = {
+
+	preload: function() {
+		console.log("preload de credits");
+	},
+
+	ok_btn: null,
+
+	create: function() {
+		console.log("update de credits");
+		var background = game.add.sprite(0,0,'credits');
+		this.ok_btn = game.add.sprite(310,520,'button');
+		this.ok_btn.inputEnabled = true;
+		this.ok_btn.input.useHandCursor = true;
+		this.ok_btn.events.onInputDown.add(this.Ok, this);
+
+		this.ok_btn.alpha = 0;
+
+	},
+
+	update: function() {
+		console.log("update de credits");
+	},
+
+	Ok: function() {
+		console.log("OK");
+		game.state.start("menu");
+	},
+
+
+}
+
+var howto = function(game){
+	console.log("howto");
+};
+
+howto.prototype = {
+
+	preload: function() {
+		console.log("preload de howto");
+	},
+
+	play_btn: null,
+
+	create: function() {
+		console.log("update de howto");
+		var background = game.add.sprite(0,0,'howto');
+		this.play_btn = game.add.sprite(310,520,'button');
+		this.play_btn.inputEnabled = true;
+		this.play_btn.input.useHandCursor = true;
+		this.play_btn.events.onInputDown.add(this.Play, this);
+
+		this.play_btn.alpha = 0;
+	},
+
+	update: function() {
+		console.log("update de howto");
+	},
+
+	Play: function() {
+		console.log("play!");
+		game.state.start("main");
+	},
+
+
+}
+
+/*var menu = function(game){
+	console.log("Menu");
+
+};
+
+
+menu.prototype = {
+
+	//preload de menu
+	preload: function(){
+		game.load.image('green-start','assets/green-start.png');
+		//game.load.image('yellow-start', 'assets/yellow-start.png');
+		game.load.image('background', 'assets/menu-back.jpg');
+		game.load.image('creditos', 'assets/creditos.png');
+
+
+	},
+
+	rock_anim: null,
+
+	start_game_button: null,
+	//start_game_button_bottom: null,
+	credits_game_button: null,
+	create: function(){
+
+
+		this.credits_game_button = game.add.sprite(600,500, 'creditos');
+		this.start_game_button = game.add.sprite(60,500, 'green-start');
+
+		game.add.sprite(0, 0, 'background');
+
+	},
+
+	update: function(){
+		this.start_game_button.inputEnabled = true;
+		this.start_game_button.input.useHandCursor = true;
+		this.start_game_button.events.onInputOver.add(this.over, this);
+		this.start_game_button.events.onInputOut.add(this.out, this);
+
+		this.start_game_button.events.onInputDown.add(this.startGame, this);
+
+		this.credits_game_button.inputEnabled = true;
+		this.credits_game_button.input.useHandCursor = true;
+		this.credits_game_button.events.onInputDown.add(this.startCredits, this);
+
+		console.log('update menuu');
+	},
+
+	over(item){
+	  //this.start_game_button.kill();
+	  console.log('entro');
+	},
+
+	startCredits(){
+		game.state.start('creditos');
+	},
+
+	startGame(){
+		console.log('start game');
+		game.state.start("intro");
+	},
+
+	out(item){
+	  this.start_game_button.revive();
+	},
+
+}*/

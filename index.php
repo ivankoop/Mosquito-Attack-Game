@@ -6,12 +6,21 @@
     <script type="text/javascript" src="system/phaser.min.js"></script>
     <script type="text/javascript" src="states/main.js"></script>
   </head>
-  <body>
-    <h1>GLOBAL GAME JAM 2018 ASUNCIÓN PARAGUAY</h1>
+  <style>
 
+    .container {
+      background-image: url('assets/background_web.png');
+      background-size: cover;
+    }
+
+  </style>
+  <body class="container">
     <script type="text/javascript">
       var game = new Phaser.Game(800, 600, Phaser.AUTO, 'ggj-2018', { preload: preload, create: create, update: update });
 
+      game.state.add("menu",menu);
+      game.state.add("credits",credits);
+      game.state.add("howto",howto);
       game.state.add("main",main);
       game.state.add("finish",finish);
 
@@ -31,7 +40,6 @@
         game.load.image('repelente','assets/repelente.png');
         game.load.image('espiral_bottom','assets/espiral_bottom.png');
         game.load.audio('mosquito_noise', 'assets/mosquito_noise.mp3');
-        game.load.audio('background_sound', 'assets/background_sound.wav');
         game.load.audio('short_spray', 'assets/short_spray2.mp3');
         game.load.audio('poof_smoke', 'assets/poof_smoke.mp3');
         game.load.audio('drink_sound', 'assets/drink_sound.wav');
@@ -39,12 +47,19 @@
         game.load.audio('full_sound', 'assets/full_sound.wav');
         game.load.audio('death_sound', 'assets/death_sound.wav');
         game.load.audio('music1','assets/music1.mp3');
+        game.load.image('button','assets/button.png');
+        game.load.image('game_over','assets/game_over.jpg');
+        game.load.image('howto','assets/howto.jpg');
+        game.load.image('menu','assets/menu.jpg');
+        game.load.image('credits','assets/credits.jpg');
         console.log("preload del game");
 
       }
 
       function create() {
-        game.state.start("main");
+        game.scale.pageAlignVertically = true;
+        game.scale.pageAlignHorizontally = true;
+        game.state.start("menu");
       }
 
       function update() {
