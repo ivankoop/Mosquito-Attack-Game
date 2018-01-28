@@ -48,9 +48,9 @@
         game.load.audio('death_sound', 'assets/death_sound.wav');
         game.load.audio('music1','assets/music1.mp3');
         game.load.image('button','assets/button.png');
-        game.load.image('game_over','assets/game_over.jpg');
-        game.load.image('howto','assets/howto.jpg');
-        game.load.image('menu','assets/menu.jpg');
+        game.load.image('game_over','assets/game_over.png');
+        game.load.image('howto','assets/howto.png');
+        game.load.image('menu','assets/menu.png');
         game.load.image('credits','assets/credits.jpg');
         console.log("preload del game");
 
