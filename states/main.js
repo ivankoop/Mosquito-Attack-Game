@@ -176,7 +176,6 @@ main.prototype = {
 
   update: function() {
 
-
 		this.nube.tilePosition.x += 0.8;
 
 		if(!this.mosquito_dead) {
@@ -215,13 +214,11 @@ main.prototype = {
 
 		}
 
-
 		this.mosquito.y += this.mosquito_y_speed;
 		this.mosquito.x += this.mosquito_x_speed;
 
 		game.physics.arcade.overlap(this.mosquito, this.people, this._collisionPeople, null, this);
 		game.physics.arcade.overlap(this.mosquito, this.bucket, this._collisionBucket, null, this);
-
 
 		game.physics.arcade.overlap(this.mosquito, this.repelente1, this._collisionRepelente, null, this);
 		game.physics.arcade.overlap(this.mosquito, this.repelente2, this._collisionRepelente, null, this);
@@ -421,7 +418,7 @@ main.prototype = {
 		this.repelente_time_event.delay -= 200;
 
 		var larvita = game.add.sprite(this.last_x_position_larva,this.last_y_position_larva,'larva');
-	
+
 		this.last_x_position_larva += 30;
 
 		if(this.last_x_position_larva == 310) { //super chota la logica, pero ni cagando le dejo ganar mas adelante hehe
@@ -513,7 +510,7 @@ finish.prototype = {
 
 	playAgain: function() {
 		//game.state.start("menu");
-		location.reload();
+		location.reload(); //MEGA APER, queria subir ya el juego.
 	},
 
 
